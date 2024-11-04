@@ -1,0 +1,41 @@
+import networkx as nx
+
+def kruskal_mst(graph):
+    mst = nx.Graph()  # Create an empty graph to store MST
+    sorted_edges = sorted(graph.edges(data=True), key=lambda x: x[2]['weight'])
+    
+    # Union-Find setup to detect cycles
+    parent = {}
+    def find(node):
+        if parent[node] != node:
+            parent[node] = find(parent[node])
+        return parent[node]
+
+    def union(node1, node2):
+        root1 = find(node1)
+        root2 = find(node2)
+        if root1 != root2:
+            parent[root2] = root1
+
+    # Initialize the parent dictionary
+    for node in graph.nodes:
+        parent[node] = node
+
+    # Kruskal's Algorithm: iterate over sorted edges
+    for u, v, weight_data in sorted_edges:
+        if find(u) != find(v):  # Add edge if it doesn't form a cycle
+            mst.add_edge(u, v, weight=weight_data['weight'])
+            union(u, v)
+
+    return mst
+
+# Create a graph and add edges with weights
+graph = nx.Graph()
+edges = [
+     (0, 1, 4), (0, 2, 3), (1, 2, 1), (1, 3, 2), (2, 3, 4),
+    (3, 4, 2), (4, 5, 6)
+]
+graph.add_weighted_edges_from(edges)
+
+mst = kruskal_mst(graph)
+print("Edges in Kruskal's MST:", list(mst.edges(data=True)))
